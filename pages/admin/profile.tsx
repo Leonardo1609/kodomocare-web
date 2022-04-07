@@ -57,9 +57,7 @@ const Profile = () => {
         <Stack flex={1}>
           <VStack>
             <FormInput
-              labelProps={{
-                fontSize: 22,
-              }}
+              labelFontSize={22}
               label="Nombres"
               error={errors.firstName?.message}
               placeholder="Ingrese sus nombres"
@@ -71,9 +69,7 @@ const Profile = () => {
               register={register('firstName')}
             />
             <FormInput
-              labelProps={{
-                fontSize: 22,
-              }}
+              labelFontSize={22}
               label="Apellidos"
               error={errors.lastName?.message}
               placeholder="Ingrese sus apellidos"
@@ -85,9 +81,7 @@ const Profile = () => {
               register={register('lastName')}
             />
             <FormInput
-              labelProps={{
-                fontSize: 22,
-              }}
+              labelFontSize={22}
               label="DNI"
               error={errors.dni?.message}
               placeholder="Ingrese su DNI"

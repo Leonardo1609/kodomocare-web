@@ -97,9 +97,6 @@ const Login = () => {
         >
           <VStack w="full">
             <FormInput
-              labelProps={{
-                fontSize: 25,
-              }}
               label="Correo"
               error={errors.email?.message}
               placeholder="Ingrese su correo"
@@ -111,9 +108,6 @@ const Login = () => {
               register={register('email')}
             />
             <FormInput
-              labelProps={{
-                fontSize: 25,
-              }}
               label="Contraseña"
               error={errors.password?.message}
               placeholder="Ingrese su contraseña"

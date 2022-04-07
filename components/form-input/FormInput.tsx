@@ -12,11 +12,11 @@ import { FC } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
 
 interface IFormInput {
+  labelFontSize?: number
+  labelColor?: string
   label?: string
   error?: string
   register?: UseFormRegisterReturn
-  labelProps?: Partial<ComponentWithAs<'label', FormLabelProps>> &
-    Partial<FormLabelProps>
 }
 
 type IProps = IFormInput &
@@ -27,12 +27,17 @@ export const FormInput: FC<IProps> = ({
   error,
   label,
   register,
-  labelProps,
+  labelColor,
+  labelFontSize,
   ...props
 }) => {
   return (
     <FormControl>
-      {label && <FormLabel {...labelProps}>{label}</FormLabel>}
+      {label && (
+        <FormLabel color={labelColor || 'black'} fontSize={labelFontSize || 25}>
+          {label}
+        </FormLabel>
+      )}
       <Input {...register} {...props} />
       <Box minH="60px" alignItems="center" display="flex">
         <Text fontSize={20} color="#FF0000">

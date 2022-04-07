@@ -6,11 +6,12 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { FormInput } from '../../components/form-input/FormInput'
-import { Layout } from '../../components/layout/Layout'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
+import { FormInput } from '../../../components/form-input/FormInput'
+import { Layout } from '../../../components/layout/Layout'
+import Link from 'next/link'
 
 interface EditData {
   firstName: string
@@ -172,16 +173,19 @@ const Edit = () => {
           >
             Guardar
           </Button>
-          <Button
-            w="222px"
-            h="40px"
-            borderRadius={4}
-            color="white"
-            fontSize={20}
-            bg="#E95656"
-          >
-            Cancelar
-          </Button>
+          <Link href="/admin/list" passHref>
+            <Button
+              as="a"
+              w="222px"
+              h="40px"
+              borderRadius={4}
+              color="white"
+              fontSize={20}
+              bg="#E95656"
+            >
+              Cancelar
+            </Button>
+          </Link>
         </HStack>
       </VStack>
     </Layout>
