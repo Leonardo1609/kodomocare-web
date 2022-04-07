@@ -1,18 +1,9 @@
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  Stack,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Button, Flex, Stack, Text, VStack } from '@chakra-ui/react'
 import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
+import { FormInput } from '../../components/form-input/FormInput'
 
 interface LoginData {
   email: string
@@ -105,40 +96,34 @@ const Login = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <VStack w="full">
-            <FormControl>
-              <FormLabel fontSize={25}>Correo</FormLabel>
-              <Input
-                placeholder="Ingrese su correo"
-                fontSize={25}
-                h={78}
-                type="email"
-                w="full"
-                borderRadius={4}
-                {...register('email')}
-              />
-              <Box height={70} alignItems="center" display="flex">
-                <Text fontSize={20} color="#FF0000">
-                  {errors.email?.message}
-                </Text>
-              </Box>
-            </FormControl>
-            <FormControl>
-              <FormLabel fontSize={25}>Contraseña</FormLabel>
-              <Input
-                placeholder="Ingrese su contraseña"
-                fontSize={25}
-                h={78}
-                type="password"
-                w="full"
-                borderRadius={4}
-                {...register('password')}
-              />
-              <Box height={70} alignItems="center" display="flex">
-                <Text fontSize={20} color="#FF0000">
-                  {errors.password?.message}
-                </Text>
-              </Box>
-            </FormControl>
+            <FormInput
+              labelProps={{
+                fontSize: 25,
+              }}
+              label="Correo"
+              error={errors.email?.message}
+              placeholder="Ingrese su correo"
+              fontSize={25}
+              h={78}
+              type="email"
+              w="full"
+              borderRadius={4}
+              register={register('email')}
+            />
+            <FormInput
+              labelProps={{
+                fontSize: 25,
+              }}
+              label="Contraseña"
+              error={errors.password?.message}
+              placeholder="Ingrese su contraseña"
+              fontSize={25}
+              h={78}
+              type="password"
+              w="full"
+              borderRadius={4}
+              register={register('password')}
+            />
           </VStack>
           <Button
             alignSelf="flex-end"

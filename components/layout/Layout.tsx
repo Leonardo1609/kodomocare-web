@@ -26,9 +26,10 @@ export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
       </Head>
       <Flex>
         <VStack
+          position="fixed"
           as="nav"
-          h="100vh"
-          w={148}
+          minH="full"
+          minW={148}
           border="2px"
           borderColor="#5680E9"
           justifyContent="space-between"
@@ -51,7 +52,7 @@ export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
           </VStack>
           <NavIcon onClick={logout} icon="logout" />
         </VStack>
-        <VStack w="full">
+        <VStack w="full" marginLeft={148}>
           <HStack
             w="full"
             as="header"
