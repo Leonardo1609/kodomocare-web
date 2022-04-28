@@ -85,7 +85,7 @@ const Login = () => {
       </div>
       <div className="flex flex-col p-10 w-2/5 items-start h-full space-y-[44px] dark:bg-gray-800 min-h-screen">
         <div className="flex flex-col items-start">
-          <h1 className="text-5xl text-primary text-left mb-3 dark:text-900">
+          <h1 className="text-5xl text-primary text-left mb-3 dark:text-blue-900">
             Iniciar Sesión
           </h1>
           <span className="text-[#727377] text-2xl dark:text-gray-300">
