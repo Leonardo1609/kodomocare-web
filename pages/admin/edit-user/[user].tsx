@@ -1,17 +1,8 @@
-import {
-  Button,
-  GridItem,
-  HStack,
-  SimpleGrid,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import * as yup from 'yup'
+import Link from 'next/link'
+import { FormInput } from '../../../components/form-input/FormInput'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-import { FormInput } from '../../../components/form-input/FormInput'
-import { Layout } from '../../../components/layout/Layout'
-import Link from 'next/link'
 
 interface EditData {
   firstName: string
@@ -59,136 +50,94 @@ const Edit = () => {
     resolver: yupResolver(editSchema),
   })
   return (
-    <Layout title="Editar" headTitle="Editar Usuario">
-      <VStack as="form" paddingX={20} onSubmit={handleSubmit(console.log)}>
-        <VStack w="full" alignItems="start">
-          <Text
-            fontSize={30}
-            borderBottomColor="black"
-            borderBottomWidth="3px"
-            w="full"
-            paddingBottom={3}
-            marginBottom="20px"
-          >
+    <>
+      <form
+        className="flex flex-col px-20"
+        onSubmit={handleSubmit(console.log)}
+      >
+        <div className="flex flex-col w-full items-start">
+          <h3 className="text-[30px] border-b-black border-b-[3px] w-full pb-3 mb-5">
             Datos personales
-          </Text>
-          <SimpleGrid columns={2} columnGap={20} w="full">
-            <GridItem colSpan={1}>
+          </h3>
+          <div className="grid grid-cols-2 gap-20 w-full">
+            <div className="col-span-1">
               <FormInput
+                inputClassName="text-lg h-[54px] w-full rounded"
                 error={errors.firstName?.message}
                 placeholder="Ingrese los nombres"
-                fontSize={18}
-                h={54}
-                type="text"
-                w="full"
-                borderRadius={4}
                 register={register('firstName')}
+                type="text"
               />
-            </GridItem>
-            <GridItem colSpan={1}>
+            </div>
+            <div className="col-span-1">
               <FormInput
+                inputClassName="text-lg h-[54px] w-full rounded"
                 error={errors.lastName?.message}
                 placeholder="Ingrese los apellidos"
-                fontSize={18}
-                h={54}
                 type="text"
-                w="full"
-                borderRadius={4}
                 register={register('lastName')}
               />
-            </GridItem>
-            <GridItem colSpan={1}>
+            </div>
+            <div className="col-span-1">
               <FormInput
+                inputClassName="text-lg h-[54px] w-full rounded"
                 error={errors.dni?.message}
                 placeholder="Ingrese el DNI"
-                fontSize={18}
-                h={54}
                 type="number"
-                w="full"
-                borderRadius={4}
                 register={register('dni')}
               />
-            </GridItem>
-            <GridItem colSpan={1}>
+            </div>
+            <div className="col-span-1">
               <FormInput
+                inputClassName="text-lg h-[54px] w-full rounded"
                 error={errors.email?.message}
                 placeholder="Ingrese el correo"
-                fontSize={18}
-                h={54}
                 type="email"
-                w="full"
-                borderRadius={4}
                 register={register('email')}
               />
-            </GridItem>
-          </SimpleGrid>
-        </VStack>
-        <VStack w="full" alignItems="start">
-          <Text
-            fontSize={30}
-            borderBottomColor="black"
-            borderBottomWidth="3px"
-            w="full"
-            paddingBottom={3}
-            marginBottom="20px"
-          >
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col w-full items-start">
+          <h3 className="text-[30px] border-b-black border-b-[3px] w-full pb-3 mb-5">
             Contraseña
-          </Text>
-          <SimpleGrid columns={2} columnGap={20} w="full">
-            <GridItem colSpan={1}>
+          </h3>
+          <div className="grid grid-cols-2 gap-20 w-full">
+            <div className="col-span-1">
               <FormInput
+                inputClassName="text-lg h-[54px] w-full rounded"
                 error={errors.password?.message}
                 placeholder="Contraseña"
-                fontSize={18}
-                h={54}
                 type="password"
-                w="full"
-                borderRadius={4}
                 register={register('password')}
               />
-            </GridItem>
-            <GridItem colSpan={1}>
+            </div>
+            <div className="col-span-1">
               <FormInput
+                inputClassName="text-lg h-[54px] w-full rounded"
                 error={errors.confirmPassword?.message}
                 placeholder="Confirmar contraseña"
-                fontSize={18}
-                h={54}
                 type="password"
-                w="full"
-                borderRadius={4}
                 register={register('confirmPassword')}
               />
-            </GridItem>
-          </SimpleGrid>
-        </VStack>
-        <HStack spacing={86} justifyContent="center">
-          <Button
-            w="222px"
-            h="40px"
-            borderRadius={4}
-            color="white"
-            fontSize={20}
-            bg="#5680E9"
+            </div>
+          </div>
+        </div>
+        <div className="flex space-x-[86px] justify-center">
+          <button
+            className="w-[222px] h-10 rounded text-white text-xl bg-primary flex justify-center items-center"
             type="submit"
           >
             Guardar
-          </Button>
+          </button>
           <Link href="/admin/list" passHref>
-            <Button
-              as="a"
-              w="222px"
-              h="40px"
-              borderRadius={4}
-              color="white"
-              fontSize={20}
-              bg="#E95656"
-            >
+            <a className="w-[222px] h-10 rounded text-white text-xl bg-primary flex justify-center items-center">
               Cancelar
-            </Button>
+            </a>
           </Link>
-        </HStack>
-      </VStack>
-    </Layout>
+        </div>
+      </form>
+    </>
   )
 }
 

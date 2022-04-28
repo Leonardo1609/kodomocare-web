@@ -1,7 +1,6 @@
 import { FC } from 'react'
 
 import NextLink from 'next/link'
-import { Link, Stack } from '@chakra-ui/react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 
@@ -18,15 +17,15 @@ export const NavIcon: FC<INavIcon> = ({ link, onClick, icon }) => {
   if (link) {
     return (
       <NextLink href={link} passHref>
-        <Link maxW={50}>
+        <a className="max-w-[50px]">
           <Image src={src} alt={icon} width={100} height={100} />
-        </Link>
+        </a>
       </NextLink>
     )
   }
   return (
-    <Stack as="button" maxW={50} onClick={onClick}>
+    <button className="max-w-[50px]" onClick={onClick}>
       <Image src={src} alt={icon} width={100} height={100} />
-    </Stack>
+    </button>
   )
 }

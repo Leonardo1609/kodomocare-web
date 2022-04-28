@@ -1,4 +1,3 @@
-import { Box, Text, VStack } from '@chakra-ui/react'
 import { FC } from 'react'
 
 interface IDashboardItem {
@@ -8,25 +7,14 @@ interface IDashboardItem {
 
 const DashboardItem: FC<IDashboardItem> = ({ title, result }) => {
   return (
-    <VStack>
-      <Text fontSize={25} textAlign="center">
+    <div className="flex flex-col items-center">
+      <span className="text-[25px] text-center dark:text-gray-300">
         {title}
-      </Text>
-      <Box
-        mt="18px !important"
-        h="80px"
-        w="full"
-        maxW="328px"
-        borderWidth={1}
-        borderColor="black"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        fontSize={30}
-      >
+      </span>
+      <div className="mt-4 h-20 w-full max-w-[328px] border border-black flex items-center justify-center text-[30px] dark:text-gray-300 dark:border-gray-300">
         {result}
-      </Box>
-    </VStack>
+      </div>
+    </div>
   )
 }
 

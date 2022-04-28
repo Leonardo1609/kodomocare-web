@@ -1,9 +1,11 @@
-import { Button, Flex, Stack, Text, VStack } from '@chakra-ui/react'
+import * as yup from 'yup'
 import Image from 'next/image'
+import { FormInput } from '../../components/form-input/FormInput'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-import { FormInput } from '../../components/form-input/FormInput'
+import { getSession, signIn, SignInResponse } from 'next-auth/react'
+import { GetServerSideProps } from 'next'
+import { useRouter } from 'next/router'
 
 interface LoginData {
   email: string
@@ -22,7 +24,25 @@ const loginSchema = yup
   })
   .required()
 
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getSession(ctx)
+
+  if (session) {
+    return {
+      redirect: {
+        destination: '/admin',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+}
+
 const Login = () => {
+  const router = useRouter()
   const {
     handleSubmit,
     register,
@@ -35,105 +55,74 @@ const Login = () => {
     resolver: yupResolver(loginSchema),
   })
 
-  const onSubmit = ({ email, password }: LoginData) => {
-    console.log(email, password)
+  const onSubmit = async ({ email, password }: LoginData) => {
+    await signIn('credentials', {
+      email,
+      password,
+      callbackUrl: `${window.location.origin}/admin`,
+    })
   }
 
   return (
-    <Flex h="100vh">
-      <Stack h="full" w="60%" position="relative">
-        <VStack
-          position="absolute"
-          bg="#5680E9"
-          h="full"
-          w="full"
-          zIndex={9}
-          opacity={0.7}
-          alignItems="start"
-          justifyContent="space-between"
-          padding={10}
-        >
-          <Stack maxW="132px">
+    <div className="flex min-h-screen">
+      <div className="w-3/5 relative">
+        <div className="flex flex-col absolute h-full w-full z-10 opacity-[0.7] items-start justify-between p-8 bg-primary dark:bg-blue-900">
+          <div className="max-w-[132px]">
             <Image src="/images/logo.png" alt="logo" width={264} height={232} />
-          </Stack>
-          <VStack alignItems="start" lineHeight={1}>
-            <Text fontSize={80} color="white">
-              Bienvenidos
-            </Text>
-            <Text fontSize={80} color="white">
-              A KodomoCare!
-            </Text>
-          </VStack>
-        </VStack>
+          </div>
+          <div className="flex flex-col items-start leading-[1]">
+            <span className="text-[80px] text-white">Bienvenidos</span>
+            <span className="text-[80px] text-white">A KodomoCare!</span>
+          </div>
+        </div>
         <Image
           src="/images/welcome.png"
           alt="welcome"
-          width={1800}
-          height={2000}
           layout="fill"
           objectFit="cover"
+          priority
         />
-      </Stack>
-      <VStack
-        padding={12}
-        width="40%"
-        alignItems="flex-start"
-        height="full"
-        spacing="44px"
-      >
-        <VStack alignItems="start">
-          <Text as="h1" fontSize={50} color="#5680E9" textAlign="left">
+      </div>
+      <div className="flex flex-col p-10 w-2/5 items-start h-full space-y-[44px] dark:bg-gray-800 min-h-screen">
+        <div className="flex flex-col items-start">
+          <h1 className="text-5xl text-primary text-left mb-3 dark:text-900">
             Iniciar Sesión
-          </Text>
-          <Text color="#727377" fontSize={25}>
+          </h1>
+          <span className="text-[#727377] text-2xl dark:text-gray-300">
             Bienvenido de vuelta, por favor ingresa tus credenciales
-          </Text>
-        </VStack>
-        <VStack
-          paddingX={2}
-          w="full"
-          as="form"
+          </span>
+        </div>
+        <form
+          className="flex flex-col px-2 w-full"
           onSubmit={handleSubmit(onSubmit)}
         >
-          <VStack w="full">
+          <div className="flex flex-col w-full">
             <FormInput
               label="Correo"
               error={errors.email?.message}
               placeholder="Ingrese su correo"
-              fontSize={25}
-              h={78}
+              inputClassName="h-[78px] w-full rounded text-2xl"
               type="email"
-              w="full"
-              borderRadius={4}
               register={register('email')}
             />
             <FormInput
               label="Contraseña"
               error={errors.password?.message}
               placeholder="Ingrese su contraseña"
-              fontSize={25}
-              h={78}
+              inputClassName="h-[78px] w-full rounded text-2xl"
               type="password"
-              w="full"
-              borderRadius={4}
               register={register('password')}
             />
-          </VStack>
-          <Button
-            alignSelf="flex-end"
-            w="full"
-            h={78}
-            borderRadius={4}
-            color="white"
-            fontSize={25}
-            bg="#5680E9"
+          </div>
+          <button
+            className="items-end w-full h-[78px] rounded text-white text-2xl bg-primary dark:bg-blue-900"
             type="submit"
           >
             Iniciar Sesión
-          </Button>
-        </VStack>
-      </VStack>
-    </Flex>
+          </button>
+        </form>
+      </div>
+    </div>
   )
 }
 

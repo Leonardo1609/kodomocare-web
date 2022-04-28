@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model evaluation {
+  id               String   @id @db.VarChar(50)
+  type             String   @db.VarChar(50)
+  score            Int
+  answers          Json
+  created_date     DateTime @db.Date
+  questionnaire_id String   @db.VarChar(50)
+}
+
+model kid {
+  id                    String   @id @db.VarChar(50)
+  first_name            String   @db.VarChar(50)
+  last_name             String   @db.VarChar(50)
+  identification_number String   @db.VarChar(10)
+  birthdate             DateTime @db.Date
+  gender                String   @db.VarChar(20)
+  relationship          String   @db.VarChar(50)
+  avatar_image          String   @db.VarChar(100)
+  user_id               String   @db.VarChar(50)
+}
+
+model questionnaire {
+  id           String   @id @db.VarChar(50)
+  kid_id       String   @db.VarChar(50)
+  status       Int
+  updated_date DateTime @db.Date
+}
+
+model role {
+  id               String @id @db.VarChar(50)
+  name             String @db.VarChar(50)
+  permission_level Int
+}
+
+model user {
+  id                    String   @id @db.VarChar(50)
+  username              String   @db.VarChar(50)
+  password              String   @db.VarChar(200)
+  email                 String   @db.VarChar(50)
+  first_name            String   @db.VarChar(50)
+  last_name             String   @db.VarChar(50)
+  identification_number String   @db.VarChar(10)
+  avatar_image          String   @db.VarChar(100)
+  status                Int
+  role_id               String   @db.VarChar(50)
+  created_date          DateTime @db.Date
+}

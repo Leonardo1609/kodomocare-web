@@ -1,9 +1,10 @@
-import { Button, Flex, Stack, Text, VStack } from '@chakra-ui/react'
-import { Layout } from '../../components/layout/Layout'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { FormInput } from '../../components/form-input/FormInput'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { ReactElement } from 'react'
+import { Layout } from '../../components/layout/Layout'
+
 interface ProfileData {
   firstName: string
   lastName: string
@@ -41,31 +42,24 @@ const Profile = () => {
   }
 
   return (
-    <Layout title="Perfil" headTitle="Perfil">
-      <Text>
+    <>
+      <p className="dark:text-gray-300 text-[25px] mb-10">
         En la vista del perfil de administrador, podrá editar su nombre,
         apellido y DNI.
-      </Text>
-      <Flex
-        padding={4}
-        w="full"
-        gap={{ base: '0', lg: '80px' }}
-        as="form"
+      </p>
+      <form
+        className="flex flex-col lg:flex-row p-4 w-full gap-0 lg:gap-20"
         onSubmit={handleSubmit(onSubmit)}
-        direction={{ base: 'column', lg: 'row' }}
       >
-        <Stack flex={1}>
-          <VStack>
+        <div className="flex-1">
+          <div className="flex flex-col lg:max-w-[600px]">
             <FormInput
               labelFontSize={22}
               label="Nombres"
               error={errors.firstName?.message}
               placeholder="Ingrese sus nombres"
-              fontSize={25}
-              h="60px"
+              inputClassName="h-[60px] w-full rounded text-2xl"
               type="text"
-              w="full"
-              borderRadius={4}
               register={register('firstName')}
             />
             <FormInput
@@ -73,11 +67,8 @@ const Profile = () => {
               label="Apellidos"
               error={errors.lastName?.message}
               placeholder="Ingrese sus apellidos"
-              fontSize={25}
-              h="60px"
+              inputClassName="h-[60px] w-full rounded text-2xl"
               type="text"
-              w="full"
-              borderRadius={4}
               register={register('lastName')}
             />
             <FormInput
@@ -85,32 +76,32 @@ const Profile = () => {
               label="DNI"
               error={errors.dni?.message}
               placeholder="Ingrese su DNI"
-              fontSize={25}
-              h="60px"
+              inputClassName="h-[60px] w-full rounded text-2xl"
               type="number"
               maxLength={8}
-              w="full"
-              borderRadius={4}
               register={register('dni')}
             />
-          </VStack>
-        </Stack>
-        <Stack flex={1} paddingY={4}>
-          <Button
-            w="full"
-            h={78}
-            borderRadius={4}
-            color="white"
-            fontSize={25}
-            bg="#5680E9"
+          </div>
+        </div>
+        <div className="flex-1 py-4">
+          <button
+            className="w-full h-[78px] rounded text-white bg-primary text-[25px] dark:bg-blue-900"
             type="submit"
           >
             Guardar Cambios
-          </Button>
-        </Stack>
-      </Flex>
-    </Layout>
+          </button>
+        </div>
+      </form>
+    </>
   )
 }
 
 export default Profile
+
+Profile.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <Layout title="Perfil" headTitle="Perfil">
+      {page}
+    </Layout>
+  )
+}

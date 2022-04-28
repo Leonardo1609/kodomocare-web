@@ -1,27 +1,17 @@
-import {
-  Box,
-  ComponentWithAs,
-  FormControl,
-  FormLabel,
-  FormLabelProps,
-  Input,
-  InputProps,
-  Text,
-} from '@chakra-ui/react'
-import { FC } from 'react'
+import { DetailedHTMLProps, FC, InputHTMLAttributes } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
 
 interface IFormInput {
   labelFontSize?: number
   labelColor?: string
+  inputClassName?: string
   label?: string
   error?: string
   register?: UseFormRegisterReturn
 }
 
 type IProps = IFormInput &
-  Partial<ComponentWithAs<'input', InputProps>> &
-  Partial<InputProps>
+  DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 
 export const FormInput: FC<IProps> = ({
   error,
@@ -29,21 +19,27 @@ export const FormInput: FC<IProps> = ({
   register,
   labelColor,
   labelFontSize,
+  className,
+  inputClassName,
   ...props
 }) => {
+  const labelClass = `block mb-2 font-bold text-2xl text-black dark:text-gray-400 text-${
+    `[${labelFontSize}px]` || '2xl'
+  } text-${`[${labelColor}]` || 'black'}`
+  const inputClass = `px-4 border border-gray-400 outline-none ${inputClassName}`
+  const containerClass = `mb-6 w-full ${className}`
+
   return (
-    <FormControl>
+    <div className={containerClass}>
       {label && (
-        <FormLabel color={labelColor || 'black'} fontSize={labelFontSize || 25}>
+        <label className={labelClass} htmlFor="name">
           {label}
-        </FormLabel>
+        </label>
       )}
-      <Input {...register} {...props} />
-      <Box minH="60px" alignItems="center" display="flex">
-        <Text fontSize={20} color="#FF0000">
-          {error}
-        </Text>
-      </Box>
-    </FormControl>
+      <input className={inputClass} {...register} {...props} />
+      <div className="min-h-[60px] items-center flex">
+        <span className="text-xl text-red-600 dark:text-red-400">{error}</span>
+      </div>
+    </div>
   )
 }

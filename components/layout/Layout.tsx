@@ -1,22 +1,26 @@
-import { Flex, HStack, Link, Stack, Text, VStack } from '@chakra-ui/react'
 import Head from 'next/head'
 import Image from 'next/image'
 import NextLink from 'next/link'
-import { useRouter } from 'next/router'
 import { FC } from 'react'
 import { NavIcon } from '../nav-icon/NavIcon'
+import { useRouter } from 'next/router'
+import { ReactNode } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 
 interface ILayout {
-  title: string
+  title?: string
   headTitle?: string
-  children: React.ReactElement | React.ReactElement[]
+  children?: ReactNode
 }
 
 export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
   const router = useRouter()
+  const session = useSession()
 
   const logout = () => {
-    router.push('/login')
+    signOut({
+      callbackUrl: `${window.location.origin}/login`,
+    })
   }
 
   return (
@@ -24,65 +28,47 @@ export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
       <Head>
         <title>{headTitle || 'KodomoCare'}</title>
       </Head>
-      <Flex>
-        <VStack
-          position="fixed"
-          as="nav"
-          minH="full"
-          minW={148}
-          border="2px"
-          borderColor="#5680E9"
-          justifyContent="space-between"
-          padding={8}
-        >
+      <div className="flex">
+        <nav className="flex flex-col items-center fixed min-h-full min-w-[148px] border-2 border-primary dark:border-blue-900 justify-between p-8 dark:bg-gray-800">
           <NextLink href="/admin" passHref>
-            <Link maxW={78}>
+            <a className="max-w-[78px]">
               <Image
                 src="/images/logo2.png"
                 alt="logo"
                 width={196}
                 height={170}
               />
-            </Link>
+            </a>
           </NextLink>
-          <VStack spacing={96 / 4}>
+          <div className="flex flex-col space-y-24">
             <NavIcon link="/admin" icon="home" />
             <NavIcon link="/admin/list" icon="list" />
             <NavIcon link="/admin/profile" icon="profile" />
-          </VStack>
+          </div>
           <NavIcon onClick={logout} icon="logout" />
-        </VStack>
-        <VStack w="full" marginLeft={148}>
-          <HStack
-            w="full"
-            as="header"
-            justifyContent="space-between"
-            bg="#5680E9"
-            paddingX={10}
-            h={140}
-          >
-            <Text fontSize={50} color="white">
-              {title}
-            </Text>
-            <HStack>
-              <Text fontWeight="bold" fontSize={30} color="white">
-                Administrador
-              </Text>
-              <Stack maxW={66} maxH={66}>
+        </nav>
+        <div className="flex flex-col w-full ml-[148px]">
+          <header className="flex items-center w-full justify-between bg-primary dark:bg-blue-900 px-10 h-[140px]">
+            <span className="text-[50px] text-white">{title}</span>
+            <div className="flex items-center">
+              <span className="font-bold text-[30px] text-white">
+                {session.data?.user?.name}
+              </span>
+              <div className="max-w-[66px] max-h-[66px]">
                 <Image
                   src="/images/admin.png"
                   alt="admin"
                   width={132}
                   height={132}
                 />
-              </Stack>
-            </HStack>
-          </HStack>
-          <Stack padding={12} w="full">
+              </div>
+            </div>
+          </header>
+          <div className="p-12 w-full bg-white dark:bg-gray-800 min-h-[calc(100vh-140px)]">
             {children}
-          </Stack>
-        </VStack>
-      </Flex>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
