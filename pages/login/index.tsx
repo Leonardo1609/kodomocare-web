@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { FormInput } from '../../components/form-input/FormInput'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { getSession, signIn, SignInResponse } from 'next-auth/react'
+import { getSession, signIn } from 'next-auth/react'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 

@@ -56,7 +56,7 @@ export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
               </span>
               <div className="max-w-[66px] max-h-[66px]">
                 <Image
-                  src="/images/admin.png"
+                  src={`/images/avatars/profile/${session.data?.user?.image}`}
                   alt="admin"
                   width={132}
                   height={132}

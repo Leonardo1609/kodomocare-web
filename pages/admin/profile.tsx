@@ -1,9 +1,16 @@
 import * as yup from 'yup'
 import { FormInput } from '../../components/form-input/FormInput'
+import { GetServerSideProps, NextPage } from 'next'
+import { Layout } from '../../components/layout/Layout'
+import { PrismaClient, user } from '@prisma/client'
+import { ReactElement, ReactNode } from 'react'
+import { getSession } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { ReactElement } from 'react'
-import { Layout } from '../../components/layout/Layout'
+import { clientAxios } from '../../axios/clientAxios'
+import { toast, ToastContainer } from 'react-toastify'
+
+const prisma = new PrismaClient()
 
 interface ProfileData {
   firstName: string
@@ -23,22 +30,69 @@ const profileSchema = yup
   })
   .required()
 
-const Profile = () => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getSession(ctx)
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    }
+  }
+  const { email } = session.user!
+  const user = await prisma.user.findFirst({
+    where: {
+      email: email || '',
+    },
+    select: {
+      email: true,
+      first_name: true,
+      last_name: true,
+      id: true,
+      identification_number: true,
+    },
+  })
+
+  return {
+    props: {
+      user,
+    },
+  }
+}
+
+type NextPageWithLayout<T> = NextPage<T> & {
+  getLayout?: (page: ReactElement) => ReactNode
+}
+
+const Profile: NextPageWithLayout<{ user: user }> = ({ user }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ProfileData>({
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      dni: '',
+      firstName: user.first_name,
+      lastName: user.last_name,
+      dni: user.identification_number,
     },
     resolver: yupResolver(profileSchema),
   })
 
-  const onSubmit = (data: ProfileData) => {
-    console.log(data)
+  const notify = (message: string) => {
+    toast(message)
+  }
+
+  const onSubmit = async (data: ProfileData) => {
+    try {
+      const resp = await clientAxios.put('/user/update-profile', { ...data })
+      if (resp.status === 200) {
+        toast.success(resp.data.message)
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message)
+    }
   }
 
   return (
@@ -77,7 +131,7 @@ const Profile = () => {
               error={errors.dni?.message}
               placeholder="Ingrese su DNI"
               inputClassName="h-[60px] w-full rounded text-2xl"
-              type="number"
+              type="text"
               maxLength={8}
               register={register('dni')}
             />
