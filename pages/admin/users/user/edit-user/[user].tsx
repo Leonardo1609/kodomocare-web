@@ -1,17 +1,13 @@
 import * as yup from 'yup'
 import Link from 'next/link'
-import { FormInput } from '../../../components/form-input/FormInput'
+import { FormInput } from '../../../../../components/form-input/FormInput'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { NextPageWithLayout } from '../../../../../interfaces/layout'
+import { PrismaClient, user } from '@prisma/client'
+import { EditData } from '../../../../../interfaces/forms/edit-data'
 
-interface EditData {
-  firstName: string
-  lastName: string
-  dni: string
-  email: string
-  password: string
-  confirmPassword: string
-}
+const prisma = new PrismaClient()
 
 const editSchema = yup
   .object({
@@ -33,27 +29,108 @@ const editSchema = yup
   })
   .required()
 
-const Edit = () => {
+import { GetServerSideProps } from 'next'
+import { getSession } from 'next-auth/react'
+import { redirect } from 'next/dist/server/api-utils'
+import { ReactElement } from 'react'
+import { Layout } from '../../../../../components/layout/Layout'
+import { clientAxios } from '../../../../../axios/clientAxios'
+import { toast } from 'react-toastify'
+
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  params,
+}) => {
+  const session = await getSession({ req })
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    }
+  }
+
+  const parent = await prisma.user.findUnique({
+    where: {
+      id: session.user?.uid,
+    },
+    select: {
+      id: true,
+      email: true,
+      first_name: true,
+      last_name: true,
+      identification_number: true,
+    },
+  })
+
+  if (!parent) {
+    return {
+      redirect: {
+        destination: '/admin',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {
+      user: parent,
+    },
+  }
+}
+
+const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<EditData>({
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      dni: '',
-      email: '',
+      firstName: user.first_name,
+      lastName: user.last_name,
+      dni: user.identification_number,
+      email: user.email,
       password: '',
       confirmPassword: '',
     },
     resolver: yupResolver(editSchema),
   })
+
+  const onSubmit = async ({
+    firstName,
+    lastName,
+    dni,
+    email,
+    password,
+  }: EditData) => {
+    const body = {
+      firstName,
+      lastName,
+      dni,
+      email,
+      password,
+    }
+
+    try {
+      const resp = await clientAxios.put(`/user/update-parent/${user.id}`, {
+        ...body,
+      })
+      if (resp.status === 200) {
+        toast.success(resp.data.message)
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message)
+    }
+  }
+
   return (
     <>
       <form
         className="flex flex-col px-20"
-        onSubmit={handleSubmit(console.log)}
+        onSubmit={handleSubmit(onSubmit)}
+        autoComplete="off"
       >
         <div className="flex flex-col w-full items-start">
           <h3 className="text-[30px] border-b-black border-b-[3px] w-full pb-3 mb-5">
@@ -83,7 +160,7 @@ const Edit = () => {
                 inputClassName="text-lg h-[54px] w-full rounded"
                 error={errors.dni?.message}
                 placeholder="Ingrese el DNI"
-                type="number"
+                type="text"
                 register={register('dni')}
               />
             </div>
@@ -110,6 +187,7 @@ const Edit = () => {
                 placeholder="Contraseña"
                 type="password"
                 register={register('password')}
+                autoComplete="new-password"
               />
             </div>
             <div className="col-span-1">
@@ -142,3 +220,11 @@ const Edit = () => {
 }
 
 export default Edit
+
+Edit.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <Layout title="Editar apoderado" headTitle="Editar apoderado">
+      {page}
+    </Layout>
+  )
+}

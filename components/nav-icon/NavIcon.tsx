@@ -11,7 +11,6 @@ interface INavIcon {
 }
 export const NavIcon: FC<INavIcon> = ({ link, onClick, icon }) => {
   const { pathname } = useRouter()
-
   const src = `/icons/${icon}${pathname === link ? '-active' : ''}.svg`
 
   if (link) {

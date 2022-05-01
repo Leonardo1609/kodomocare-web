@@ -3,7 +3,6 @@ import Image from 'next/image'
 import NextLink from 'next/link'
 import { FC } from 'react'
 import { NavIcon } from '../nav-icon/NavIcon'
-import { useRouter } from 'next/router'
 import { ReactNode } from 'react'
 import { signOut, useSession } from 'next-auth/react'
 
@@ -14,7 +13,6 @@ interface ILayout {
 }
 
 export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
-  const router = useRouter()
   const session = useSession()
 
   const logout = () => {
@@ -42,7 +40,7 @@ export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
           </NextLink>
           <div className="flex flex-col space-y-24">
             <NavIcon link="/admin" icon="home" />
-            <NavIcon link="/admin/list" icon="list" />
+            <NavIcon link="/admin/users" icon="list" />
             <NavIcon link="/admin/profile" icon="profile" />
           </div>
           <NavIcon onClick={logout} icon="logout" />

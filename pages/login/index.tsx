@@ -6,6 +6,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { getSession, signIn } from 'next-auth/react'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 
 interface LoginData {
   email: string
@@ -43,6 +45,17 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 const Login = () => {
   const router = useRouter()
+  const [loginError, setLoginError] = useState('')
+
+  useEffect(() => {
+    if (router.query.error === 'Invalid credentials')
+      setLoginError('Credenciales inválidas')
+  }, [router])
+
+  useEffect(() => {
+    if (loginError) toast.error(loginError)
+  }, [loginError])
+
   const {
     handleSubmit,
     register,

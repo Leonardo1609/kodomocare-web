@@ -1,7 +1,27 @@
 import DashboardItem from '../../components/dashboard-item/DashboardItem'
 import { DashboardChart } from '../../components/dashboard-chart/DashboardChart'
+import { GetServerSideProps } from 'next'
 import { Layout } from '../../components/layout/Layout'
 import { ReactElement } from 'react'
+import { getSession } from 'next-auth/react'
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getSession(ctx)
+  console.log(session)
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+}
 
 const Home = () => {
   return (

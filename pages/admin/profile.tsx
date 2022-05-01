@@ -8,7 +8,8 @@ import { getSession } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { clientAxios } from '../../axios/clientAxios'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
+import { NextPageWithLayout } from '../../interfaces/layout'
 
 const prisma = new PrismaClient()
 
@@ -30,8 +31,8 @@ const profileSchema = yup
   })
   .required()
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getSession(ctx)
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const session = await getSession({ req })
 
   if (!session) {
     return {
@@ -41,10 +42,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       },
     }
   }
-  const { email } = session.user!
-  const user = await prisma.user.findFirst({
+  const { uid } = session.user!
+  const user = await prisma.user.findUnique({
     where: {
-      email: email || '',
+      id: uid,
     },
     select: {
       email: true,
@@ -62,10 +63,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 }
 
-type NextPageWithLayout<T> = NextPage<T> & {
-  getLayout?: (page: ReactElement) => ReactNode
-}
-
 const Profile: NextPageWithLayout<{ user: user }> = ({ user }) => {
   const {
     register,
@@ -79,10 +76,6 @@ const Profile: NextPageWithLayout<{ user: user }> = ({ user }) => {
     },
     resolver: yupResolver(profileSchema),
   })
-
-  const notify = (message: string) => {
-    toast(message)
-  }
 
   const onSubmit = async (data: ProfileData) => {
     try {
