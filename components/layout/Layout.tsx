@@ -53,6 +53,7 @@ export const Layout: FC<ILayout> = ({ title, headTitle, children }) => {
     <>
       <Head>
         <title>{headTitle || 'KodomoCare'}</title>
+        <link rel="icon" type="image/x-icon" href="/images/logo2.png" />
       </Head>
       <div className="flex">
         <nav className="flex flex-col items-center fixed z-50 min-h-full min-w-[148px] border-2 border-primary dark:border-blue-900 justify-between p-8 dark:bg-gray-800">

@@ -1,8 +1,8 @@
 
-export const getMonthDifference = (startDate: Date, endDate: Date = new Date()) => {
+export const getMonthDifference = (birthDate: Date, endDate: Date = new Date()) => {
     return (
         endDate.getMonth() -
-        startDate.getMonth() +
-        12 * (endDate.getFullYear() - startDate.getFullYear())
+        birthDate.getMonth() +
+        12 * (endDate.getFullYear() - birthDate.getFullYear())
     )
 }

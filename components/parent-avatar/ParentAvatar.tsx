@@ -9,7 +9,7 @@ export const ParentAvatar: FC<{ user: user; hasEditButton?: boolean }> = ({
 }) => {
   return (
     <div className="flex space-x-4">
-      <div className="border border-primary dark:border-blue-800 rounded p-2 shadow-sm shadow-primary dark:shadow-blue-800 self-start">
+      <div className="border border-primary dark:border-blue-800 rounded p-2 shadow-sm shadow-primary dark:shadow-blue-800 self-start max-w-[140px] w-full">
         <Image
           src={`/images/avatars/profile/${user.avatar_image}`}
           alt="admin"

@@ -36,7 +36,7 @@ export const ParentActions: FC<{ user: user }> = ({ user }) => {
             Acceder
           </a>
         </Link>
-        {actionsUser.status ? (
+        {actionsUser.status === 0 ? (
           <button
             className="text-white bg-red-400 dark:bg-red-600 rounded px-6 text-[25px] w-full md:w-auto"
             onClick={toggleActive}

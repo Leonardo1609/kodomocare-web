@@ -25,7 +25,7 @@ export default async function handler(
 
             const user = await prisma.user.update({
                 data: {
-                    status: foundUser.status ? 0 : 1
+                    status: foundUser.status === 0 ? 1 : 0
                 },
                 where: {
                     id: foundUser.id
