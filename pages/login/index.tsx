@@ -48,8 +48,7 @@ const Login = () => {
   const [loginError, setLoginError] = useState('')
 
   useEffect(() => {
-    if (router.query.error === 'Invalid credentials')
-      setLoginError('Credenciales inválidas')
+    if (router.query.error) setLoginError(router.query.error.toString())
   }, [router])
 
   useEffect(() => {

@@ -1,34 +1,23 @@
-import { PrismaClient } from "@prisma/client"
 import { NextApiRequest, NextApiResponse } from "next"
+import { PrismaClient } from "@prisma/client"
 import { getSession } from "next-auth/react";
 
 const prisma = new PrismaClient()
 
-interface ProfileRequest {
-    firstName?: string,
-    lastName?: string,
-    dni?: string,
-    id?: string
-}
-
-interface ExtendedNextApiRequest extends NextApiRequest {
-    body: ProfileRequest;
-}
-
 export default async function handler(
-    req: ExtendedNextApiRequest,
-    res: NextApiResponse<{ message: string }>
+    req: NextApiRequest,
+    res: NextApiResponse<{ message: string, status?: number }>
 ) {
     const session = await getSession({ req })
+    const { query } = req
 
     if (!session) return res.status(404).json({ message: 'No autorizado' });
 
     if (req.method === 'PUT') {
-        const { dni, firstName, lastName } = req.body
         try {
             const foundUser = await prisma.user.findUnique({
                 where: {
-                    id: session?.user?.uid
+                    id: query.userId.toString()
                 }
             })
 
@@ -36,17 +25,16 @@ export default async function handler(
 
             const user = await prisma.user.update({
                 data: {
-                    identification_number: dni,
-                    last_name: lastName,
-                    first_name: firstName
+                    status: foundUser.status ? 0 : 1
                 },
                 where: {
                     id: foundUser.id
                 }
             })
 
-            return res.status(200).json({ message: 'Perfil actualizado' })
+            return res.status(200).json({ message: 'Perfil actualizado', status: user.status })
         } catch (err) {
+            console.log(err)
             res.status(500).json({ message: 'Hubo un error. Por favor contacte con el administrador' })
         }
     }

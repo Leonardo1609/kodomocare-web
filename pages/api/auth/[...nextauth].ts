@@ -1,10 +1,9 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth/next";
-import axios from "axios";
 import { PrismaClient } from '@prisma/client'
 import { verifyPassword } from "../../../helpers/auth";
 import { Buffer } from 'buffer'
-import { string } from "yup";
+import { komodoroAxiosServer } from "../../../axios/komodoroAxios";
 
 const prisma = new PrismaClient()
 
@@ -46,32 +45,43 @@ export default NextAuth({
             async authorize(credentials) {
                 const user = await prisma.user.findFirst({
                     where: {
-                        email: credentials?.email
+                        email: credentials?.email,
+                        role_id: '2'
                     }
                 })
-                if (!user) throw new Error("No user found")
+                if (!user) throw new Error("No autorizado")
 
                 const basicToken = Buffer.from(credentials?.email + ":" + credentials?.password).toString('base64');
 
-                const { data } = await axios.post<{ token: string, profileImage: string }>('http://localhost:3001/login', {
-                    username: credentials?.email,
-                    password: credentials?.password
-                }, {
-                    headers: {
-                        Authorization: 'Basic ' + basicToken,
-                    }
-                })
+                let token: string = ''
+
+                try {
+                    const { data } = await komodoroAxiosServer.post<{ token: string, profileImage: string }>('/login', {
+                        username: credentials?.email,
+                        password: credentials?.password
+                    }, {
+                        headers: {
+                            Authorization: 'Basic ' + basicToken,
+                        }
+                    })
+                    token = data.token
+
+                } catch (err) {
+                    throw new Error("Error interno, por favor contacte con el administrador")
+                }
+
+                if (!token) throw new Error("Error interno, por favor contacte con el administrador")
 
                 const passwordsMatch = await verifyPassword(credentials?.password!, user?.password)
 
-                if (!passwordsMatch) throw new Error("Invalid credentials")
+                if (!passwordsMatch) throw new Error("Credenciales inválidas")
 
                 return {
                     id: user?.id,
                     email: user?.email,
                     name: `${user?.first_name} ${user?.last_name}`,
                     image: user?.avatar_image,
-                    backendToken: data.token
+                    backendToken: token
                 }
             }
         })

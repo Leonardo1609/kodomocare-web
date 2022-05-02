@@ -1,15 +1,17 @@
 import * as yup from 'yup'
 import { FormInput } from '../../components/form-input/FormInput'
-import { GetServerSideProps, NextPage } from 'next'
+import { GetServerSideProps } from 'next'
 import { Layout } from '../../components/layout/Layout'
 import { PrismaClient, user } from '@prisma/client'
-import { ReactElement, ReactNode } from 'react'
+import { ReactElement, useContext } from 'react'
 import { getSession } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { clientAxios } from '../../axios/clientAxios'
 import { toast } from 'react-toastify'
 import { NextPageWithLayout } from '../../interfaces/layout'
+import { AdminContext } from '../../context/admin/adminContext'
+import { useRouter } from 'next/router'
 
 const prisma = new PrismaClient()
 
@@ -64,6 +66,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 }
 
 const Profile: NextPageWithLayout<{ user: user }> = ({ user }) => {
+  const router = useRouter()
+  const { setCurrentAdmin } = useContext(AdminContext)
   const {
     register,
     handleSubmit,
@@ -81,7 +85,17 @@ const Profile: NextPageWithLayout<{ user: user }> = ({ user }) => {
     try {
       const resp = await clientAxios.put('/user/update-profile', { ...data })
       if (resp.status === 200) {
+        setCurrentAdmin((admin) => {
+          return {
+            ...admin,
+            dni: data.dni,
+            firstName: data.firstName,
+            lastName: data.lastName,
+          }
+        })
+
         toast.success(resp.data.message)
+        router.push(`/admin`)
       }
     } catch (err: any) {
       toast.error(err.response?.data?.message)

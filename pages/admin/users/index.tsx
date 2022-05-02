@@ -28,6 +28,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       identification_number: true,
       avatar_image: true,
       role_id: true,
+      status: true,
     },
   })
 

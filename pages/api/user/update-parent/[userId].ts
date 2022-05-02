@@ -6,10 +6,10 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 interface ParentRequest {
-    firstName?: string,
-    lastName?: string,
-    email?: string,
-    dni?: string,
+    firstName?: string
+    lastName?: string
+    email?: string
+    dni?: string
     password?: string
 }
 

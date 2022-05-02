@@ -1,15 +1,11 @@
 import '../styles/globals.css'
 import 'react-toastify/dist/ReactToastify.css'
-import type { AppProps } from 'next/app'
-import { SessionProvider } from 'next-auth/react'
-import { NextPage } from 'next'
-import { ReactElement, ReactNode } from 'react'
-import { ToastContainer } from 'react-toastify'
 import NextNProgress from 'nextjs-progressbar'
-
-type NextPageWithLayout = NextPage & {
-  getLayout?: (page: ReactElement) => ReactNode
-}
+import type { AppProps } from 'next/app'
+import { AdminProvider } from '../context/admin/AdminProvider'
+import { SessionProvider } from 'next-auth/react'
+import { ToastContainer } from 'react-toastify'
+import { NextPageWithLayout } from '../interfaces/layout'
 
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout
@@ -23,7 +19,7 @@ function MyApp({
   return (
     <SessionProvider session={session}>
       <NextNProgress />
-      {getLayout(<Component {...pageProps} />)}
+      <AdminProvider>{getLayout(<Component {...pageProps} />)}</AdminProvider>
       <ToastContainer autoClose={2500} theme="colored" />
     </SessionProvider>
   )
