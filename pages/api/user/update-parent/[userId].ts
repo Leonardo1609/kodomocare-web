@@ -1,10 +1,7 @@
-import { PrismaClient } from "@prisma/client"
-import { NextApiRequest, NextApiResponse } from "next"
-import { getSession } from "next-auth/react";
 import bcrypt from 'bcrypt'
-
-const prisma = new PrismaClient()
-
+import { NextApiRequest, NextApiResponse } from "next"
+import { db } from "../../../../db";
+import { getSession } from "next-auth/react";
 interface ParentRequest {
     firstName?: string
     lastName?: string
@@ -29,7 +26,7 @@ export default async function handler(
     if (req.method === 'PUT') {
         const { dni, firstName, lastName, password, email } = req.body
         try {
-            const foundUser = await prisma.user.findUnique({
+            const foundUser = await db.user.findUnique({
                 where: {
                     id: query.userId.toString()
                 }
@@ -38,7 +35,7 @@ export default async function handler(
             if (!foundUser) return res.status(404).json({ message: 'Usuario no encontrado' });
 
             if (!password) {
-                await prisma.user.update({
+                await db.user.update({
                     data: {
                         identification_number: dni,
                         last_name: lastName,
@@ -51,7 +48,7 @@ export default async function handler(
                 })
             } else {
                 const hashedPassword = await bcrypt.hash(password, 10);
-                await prisma.user.update({
+                await db.user.update({
                     data: {
                         identification_number: dni,
                         last_name: lastName,

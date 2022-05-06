@@ -2,11 +2,10 @@ import { GetServerSideProps } from 'next'
 import { Layout } from '../../../components/layout/Layout'
 import { NextPageWithLayout } from '../../../interfaces/layout'
 import { ParentActions } from '../../../components/ParentActions/ParentActions'
-import { PrismaClient, user } from '@prisma/client'
+import { user } from '@prisma/client'
 import { ReactElement } from 'react'
 import { getSession } from 'next-auth/react'
-
-const prisma = new PrismaClient()
+import { db } from '../../../db'
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getSession(ctx)
@@ -20,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     }
   }
 
-  const users = await prisma.user.findMany({
+  const users = await db.user.findMany({
     select: {
       id: true,
       first_name: true,
@@ -44,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 const List: NextPageWithLayout<{ users: user[] }> = ({ users }) => {
   return (
     <section>
-      <h2 className="dark:text-gray-300 font-bold text-[25px] mb-[37px]">
+      <h2 className="dark:text-gray-300 font-bold text-lg md:text-[25px] mb-5 md:mb-[37px]">
         Apoderado
       </h2>
       <ul>

@@ -1,18 +1,17 @@
+import Link from 'next/link'
 import { FC, useState } from 'react'
 import { ParentAvatar } from '../parent-avatar/ParentAvatar'
-import { user } from '@prisma/client'
-import Link from 'next/link'
-import { clientAxios } from '../../axios/clientAxios'
 import { toast } from 'react-toastify'
+import { updateStatusParent } from '../../services/client/users'
+import { user } from '@prisma/client'
 
 export const ParentActions: FC<{ user: user }> = ({ user }) => {
-  const [actionsUser, setActionsUser] = useState(user)
+  const [actionsUser, setActionsUser] = useState<user>(user)
 
   const toggleActive = async () => {
     try {
-      const resp = await clientAxios.put<{ message: string; status?: number }>(
-        `/user/update-parent/toggle-active/${user.id}`
-      )
+      const resp = await updateStatusParent(user.id)
+
       if (resp.status === 200) {
         toast.success(resp.data.message)
         setActionsUser((currentActionUser) => ({
@@ -26,26 +25,26 @@ export const ParentActions: FC<{ user: user }> = ({ user }) => {
   }
 
   return (
-    <div className="mb-6 flex space-x-6">
-      <div className="max-w-[350px] w-full">
+    <div className="mb-6 flex space-x-0 md:space-x-6 flex-col md:flex-row">
+      <div className="md:max-w-[350px] w-full mb-3 md:mb-6">
         <ParentAvatar user={actionsUser} />
       </div>
-      <div className="flex flex-col md:flex-row items-center flex-1 max-w-2xl justify-center space-y-6 md:space-x-6 md:space-y-0">
+      <div className="flex items-center flex-1 md:max-w-2xl justify-center space-x-6 text-white">
         <Link href={`/admin/users/user/${user.id}`}>
-          <a className="text-white bg-primary dark:bg-blue-800 rounded px-8 text-[25px] w-full md:w-auto">
+          <a className="bg-primary dark:bg-blue-800 rounded px-8 text-xl md:text-[25px] w-full md:w-auto text-center md:h-auto py-1">
             Acceder
           </a>
         </Link>
         {actionsUser.status === 0 ? (
           <button
-            className="text-white bg-red-400 dark:bg-red-600 rounded px-6 text-[25px] w-full md:w-auto"
+            className="bg-red-400 dark:bg-red-600 rounded px-6 text-xl md:text-[25px] w-full md:w-auto text-center md:h-auto py-1"
             onClick={toggleActive}
           >
             Desactivar
           </button>
         ) : (
           <button
-            className="text-white bg-green-500 dark:bg-green-700 rounded px-6 text-[25px] w-full md:w-auto"
+            className="bg-green-500 dark:bg-green-700 rounded px-6 text-xl md:text-[25px] w-full md:w-auto text-center md:h-auto py-1"
             onClick={toggleActive}
           >
             Activar

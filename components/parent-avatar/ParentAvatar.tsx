@@ -17,13 +17,19 @@ export const ParentAvatar: FC<{ user: user; hasEditButton?: boolean }> = ({
           height={132}
         />
       </div>
-      <div className="dark:text-gray-300 leading-8 text-xl">
-        <p>Nombres: {user.first_name}</p>
-        <p>Apellidos: {user.last_name}</p>
-        <p>DNI: {user.identification_number}</p>
+      <div className="dark:text-gray-300 leading-8 text-base md:text-xl">
+        <p>
+          <strong>Nombres:</strong> {user.first_name}
+        </p>
+        <p>
+          <strong>Apellidos:</strong> {user.last_name}
+        </p>
+        <p>
+          <strong>DNI:</strong> {user.identification_number}
+        </p>
         {hasEditButton && (
           <Link href={`/admin/users/user/edit-user/${user.id}`}>
-            <a className="text-white bg-primary dark:bg-blue-800 rounded px-8 text-[25px] w-full md:w-auto inline-block mt-3">
+            <a className="text-white bg-primary dark:bg-blue-800 rounded px-8 text-xl md:text-[25px] w-full md:w-auto inline-block mt-3 text-center py-1">
               Editar
             </a>
           </Link>

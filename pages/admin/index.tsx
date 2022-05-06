@@ -2,14 +2,15 @@ import DashboardItem from '../../components/dashboard-item/DashboardItem'
 import { DashboardChart } from '../../components/dashboard-chart/DashboardChart'
 import { GetServerSideProps } from 'next'
 import { Layout } from '../../components/layout/Layout'
-import { ReactElement } from 'react'
-import { getSession } from 'next-auth/react'
-import { komodoroAxiosServer } from '../../axios/komodoroAxios'
 import { NextPageWithLayout } from '../../interfaces/layout'
-import { PrismaClient } from '@prisma/client'
+import { ReactElement } from 'react'
+import {
+  getKidsAgesInEvaluations,
+  getQuestionnariesWithMonth,
+} from '../../services/server/questionnaires'
+import { getSession } from 'next-auth/react'
 import { monthsTranslated } from '../../helpers/dates'
-
-const prisma = new PrismaClient()
+import { db } from '../../db'
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getSession(ctx)
@@ -33,13 +34,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 
   try {
-    const { data: questionnaires } = await komodoroAxiosServer.get<any[]>(
-      '/admin/questionnaires',
-      {
-        headers: {
-          authorization: `Bearer ${session.user.backendToken!}`,
-        },
-      }
+    const { data: questionnaires } = await getQuestionnariesWithMonth(
+      session.user.backendToken!
     )
 
     const questionnariesPerMonth = questionnaires.reduce<
@@ -64,13 +60,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       ) / Object.keys(questionnariesPerMonth).length
     )
 
-    const { data: evaluationsMonth } = await komodoroAxiosServer.get<any[]>(
-      '/admin/evaluations-month/',
-      {
-        headers: {
-          authorization: `Bearer ${session.user.backendToken!}`,
-        },
-      }
+    const { data: evaluationsMonth } = await getKidsAgesInEvaluations(
+      session.user.backendToken!
     )
 
     averageTestsAges = Math.round(
@@ -79,15 +70,18 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       }, 0) / evaluationsMonth.length
     )
 
-    inactiveUsers = await prisma.user.count({
+    inactiveUsers = await db.user.count({
       where: {
         status: 1,
       },
     })
 
-    const allUsers = await prisma.user.findMany({
+    const allUsers = await db.user.findMany({
       where: {
         role_id: '1',
+      },
+      orderBy: {
+        created_date: 'asc',
       },
     })
 
@@ -146,13 +140,15 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 }
 
-const Home: NextPageWithLayout<{
+interface IHome {
   averageTestsAges: number
   inactiveUsers: number
   averageTestsPerMonth: number
   averageUsersPerMonth: number
   chartInfo: { labels: string[]; values: number[] }
-}> = ({
+}
+
+const Home: NextPageWithLayout<IHome> = ({
   averageTestsAges,
   inactiveUsers,
   averageTestsPerMonth,
@@ -161,7 +157,7 @@ const Home: NextPageWithLayout<{
 }) => {
   return (
     <>
-      <h3 className="text-[25px] mb-10 inline-block dark:text-gray-300">
+      <h3 className="text-lg font-bold lg:font-normal lg:text-[25px] mb-10 inline-block dark:text-gray-300">
         Usuarios registrados
       </h3>
       <div className="max-w-[725px] max-h-[361px] w-full">

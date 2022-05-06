@@ -5,3 +5,9 @@ export interface ICurrentAdmin {
     email: string,
     dni: string
 }
+
+export interface ProfileData {
+    firstName: string
+    lastName: string
+    dni: string
+}

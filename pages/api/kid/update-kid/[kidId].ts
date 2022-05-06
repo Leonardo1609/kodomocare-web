@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client"
 import { NextApiRequest, NextApiResponse } from "next"
+import { db } from "../../../../db";
 import { getSession } from "next-auth/react";
-
-const prisma = new PrismaClient()
 
 interface KidRequest {
     firstName?: string,
@@ -28,7 +26,7 @@ export default async function handler(
     if (req.method === 'PUT') {
         const { dni, firstName, lastName, gender, relationship } = req.body
         try {
-            const foundKid = await prisma.kid.findUnique({
+            const foundKid = await db.kid.findUnique({
                 where: {
                     id: query.kidId.toString()
                 }
@@ -36,7 +34,7 @@ export default async function handler(
 
             if (!foundKid) return res.status(404).json({ message: 'Menor no encontrado' });
 
-            await prisma.kid.update({
+            await db.kid.update({
                 data: {
                     identification_number: dni,
                     last_name: lastName,

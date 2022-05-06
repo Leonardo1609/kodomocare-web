@@ -1,31 +1,21 @@
-import { NextPage } from 'next'
-import { ReactElement, ReactNode, useEffect, useState } from 'react'
-import { Layout } from '../../../../components/layout/Layout'
-import { ParentAvatar } from '../../../../components/parent-avatar/ParentAvatar'
-import { GetServerSideProps } from 'next'
-import { getSession, useSession } from 'next-auth/react'
-import { kid, PrismaClient, user } from '@prisma/client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getMonthDifference } from '../../../../helpers/kids'
-import { komodoroAxiosClient } from '../../../../axios/komodoroAxios'
-import { TestsChart } from '../../../../components/tests-chart/TestsChart'
-import { SingleTestChart } from '../../../../components/single-test-chart/SingleTestChart'
+import { GetServerSideProps } from 'next'
 import {
-  EvaluationType,
   IKidsQuestionnaries,
   Questionnaire,
 } from '../../../../interfaces/questionnaires'
-import {
-  getEvaluationByType,
-  getEvaluationRatingMessage,
-} from '../../../../helpers/evaluations'
-
-const prisma = new PrismaClient()
-
-type NextPageWithLayout<T> = NextPage<T> & {
-  getLayout?: (page: ReactElement) => ReactNode
-}
+import { Layout } from '../../../../components/layout/Layout'
+import { NextPageWithLayout } from '../../../../interfaces/layout'
+import { ParentAvatar } from '../../../../components/parent-avatar/ParentAvatar'
+import { PsychomotorTests } from '../../../../components/psychomotor-tests/PsychomotorTests'
+import { ReactElement, useEffect, useState } from 'react'
+import { TestsChart } from '../../../../components/tests-chart/TestsChart'
+import { getMonthDifference } from '../../../../helpers/kids'
+import { getSession, useSession } from 'next-auth/react'
+import { kid, user } from '@prisma/client'
+import { getKidsByParent } from '../../../../services/client/kid'
+import { db } from '../../../../db'
 
 interface IParsedKid extends Omit<kid, 'birthdate'> {
   birthdate: string
@@ -49,7 +39,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   const userId = params?.userId?.toString()
 
-  const parent = await prisma.user.findUnique({
+  const parent = await db.user.findUnique({
     where: {
       id: userId,
     },
@@ -71,7 +61,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     }
   }
 
-  const kidsFound = await prisma.kid.findMany({
+  const kidsFound = await db.kid.findMany({
     where: {
       user_id: parent.id,
     },
@@ -106,15 +96,7 @@ const EditParentUser: NextPageWithLayout<{
 
   useEffect(() => {
     if (token && parent) {
-      komodoroAxiosClient
-        .get<IKidsQuestionnaries[]>(
-          `/admin/questionnaires-completed/${parent.id}`,
-          {
-            headers: {
-              authorization: `Bearer ${token}`,
-            },
-          }
-        )
+      getKidsByParent(parent.id)
         .then((resp) => {
           setLoading(true)
           setKidsTests(resp.data)
@@ -137,10 +119,11 @@ const EditParentUser: NextPageWithLayout<{
   }, [kidsTests, activeKid])
 
   return (
-    <section className="flex w-full h-full">
-      <div className="max-w-[350px] w-full">
+    <section className="flex flex-col lg:flex-row w-full h-full">
+      <div className="lg:max-w-[350px] w-full">
         <ParentAvatar user={parent} hasEditButton={true} />
-        <hr className="my-5 border-primary dark:border-blue-800 border-b-" />
+        <hr className="my-5 border-primary dark:border-blue-800" />
+        {/* Kids to select */}
         {kids.length ? (
           <ul className="flex space-x-4 overflow-x-auto pb-2">
             {kids.map((kid) => (
@@ -168,14 +151,21 @@ const EditParentUser: NextPageWithLayout<{
             No se registró ningún menor
           </span>
         )}
+        {/* Active kid information */}
         {activeKid && !loading && (
-          <div className="leading-8 text-xl dark:text-gray-300 mt-5">
-            <p>Nombres: {activeKid.first_name}</p>
-            <p>Apellidos: {activeKid.last_name}</p>
-            <p>Edad: {activeKid.months} meses</p>
+          <div className="leading-8 text-base md:text-xl dark:text-gray-300 mt-5">
+            <p>
+              <strong>Nombres:</strong> {activeKid.first_name}
+            </p>
+            <p>
+              <strong>Apellidos:</strong> {activeKid.last_name}
+            </p>
+            <p>
+              <strong>Edad:</strong> {activeKid.months} meses
+            </p>
 
             <Link href={`/admin/users/user/edit-kid/${activeKid.id}`}>
-              <a className="text-white bg-primary dark:bg-blue-800 rounded px-8 text-[25px] w-full md:w-auto inline-block mt-3">
+              <a className="text-white bg-primary dark:bg-blue-800 rounded px-8 text-xl md:text-[25px] inline-block mt-3 text-center py-1">
                 Editar
               </a>
             </Link>
@@ -186,11 +176,14 @@ const EditParentUser: NextPageWithLayout<{
           </div>
         )}
       </div>
-      <div className="min-h-full w-1 bg-primary dark:bg-blue-800 mx-12"></div>
+      {/* Separator */}
+      <div className="hidden lg:block min-h-full w-1 bg-primary dark:bg-blue-800 mx-8"></div>
+
+      {/* Charts */}
       <div className="h-full w-full">
         {activeKidTests.length ? (
           <div>
-            <div className="min-w-[400px] max-w-[90%]">
+            <div className="min-w-[400px] max-w-[90%] hidden md:block mt-10 lg:mt-0">
               <TestsChart
                 tests={{
                   first: activeKidTests[0],
@@ -202,163 +195,11 @@ const EditParentUser: NextPageWithLayout<{
               />
             </div>
             <div className="mt-10">
-              <h4 className="dark:text-gray-300 mb-4 text-[25px] font-bold">
-                Pruebas psicomotrices
-              </h4>
-              <ul className="w-full">
-                {activeKidTests.map((test, idx) => (
-                  <li
-                    key={test.id}
-                    className="border border-primary dark:border-blue-800 rounded mb-3 px-5 py-2"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-[25px] dark:text-gray-300">
-                        PS-{idx + 1}
-                      </span>
-                      {testOpenId === test.id ? (
-                        <button onClick={setTestOpenId.bind(this, null)}>
-                          <div className="border-solid border-b-primary dark:border-b-blue-800 border-b-8 border-x-transparent border-x-8 border-t-0" />
-                        </button>
-                      ) : (
-                        <button onClick={setTestOpenId.bind(this, test.id!)}>
-                          <div className="border-solid border-t-primary dark:border-t-blue-800 border-t-8 border-x-transparent border-x-8 border-b-0" />
-                        </button>
-                      )}
-                    </div>
-                    {testOpenId === test.id && (
-                      <div className="flex">
-                        <div className="w-2/5">
-                          <SingleTestChart
-                            tests={{
-                              current: test,
-                              previous: idx ? activeKidTests[idx - 1] : null,
-                            }}
-                          />
-                        </div>
-                        <div className="dark:text-gray-300">
-                          <div className="flex w-full px-4 mb-2">
-                            <span className="flex-1">Comunicación</span>
-                            <span
-                              className="flex-1"
-                              style={{
-                                color: getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.communication
-                                  )
-                                ).evaluationDiagnosisColor,
-                              }}
-                            >
-                              {
-                                getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.communication
-                                  )
-                                ).evaluationDiagnosis
-                              }
-                            </span>
-                          </div>
-                          <div className="flex w-full px-4 mb-2">
-                            <span className="flex-1">Motora Gruesa</span>
-                            <span
-                              className="flex-1"
-                              style={{
-                                color: getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.gross_motor
-                                  )
-                                ).evaluationDiagnosisColor,
-                              }}
-                            >
-                              {
-                                getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.gross_motor
-                                  )
-                                ).evaluationDiagnosis
-                              }
-                            </span>
-                          </div>
-                          <div className="flex w-full px-4 mb-2">
-                            <span className="flex-1">Motora Fina</span>
-                            <span
-                              className="flex-1"
-                              style={{
-                                color: getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.fine_motor
-                                  )
-                                ).evaluationDiagnosisColor,
-                              }}
-                            >
-                              {
-                                getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.fine_motor
-                                  )
-                                ).evaluationDiagnosis
-                              }
-                            </span>
-                          </div>
-                          <div className="flex w-full px-4 mb-2">
-                            <span className="flex-1">
-                              Resolución de Problemas
-                            </span>
-                            <span
-                              className="flex-1"
-                              style={{
-                                color: getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.problem_solving
-                                  )
-                                ).evaluationDiagnosisColor,
-                              }}
-                            >
-                              {
-                                getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.problem_solving
-                                  )
-                                ).evaluationDiagnosis
-                              }
-                            </span>
-                          </div>
-                          <div className="flex w-full px-4">
-                            <span className="flex-1">Socio-Individual</span>
-                            <span
-                              className="flex-1"
-                              style={{
-                                color: getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.problem_solving
-                                  )
-                                ).evaluationDiagnosisColor,
-                              }}
-                            >
-                              {
-                                getEvaluationRatingMessage(
-                                  getEvaluationByType(
-                                    test.evaluations,
-                                    EvaluationType.problem_solving
-                                  )
-                                ).evaluationDiagnosis
-                              }
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <PsychomotorTests
+                activeKidTests={activeKidTests}
+                testOpenId={testOpenId}
+                setTestOpenId={setTestOpenId}
+              />
             </div>
           </div>
         ) : (
@@ -379,7 +220,7 @@ const EditParentUser: NextPageWithLayout<{
           </div>
         )}
         <Link href={`/admin/users`}>
-          <a className="text-white bg-red-400 dark:bg-red-700 rounded px-8 py-1 text-[25px] w-full md:w-auto">
+          <a className="text-white bg-red-400 dark:bg-red-700 rounded px-8 py-1 text-xl md:text-[25px] w-full md:w-auto">
             Regresar
           </a>
         </Link>

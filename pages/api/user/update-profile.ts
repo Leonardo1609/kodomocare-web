@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client"
 import { NextApiRequest, NextApiResponse } from "next"
+import { db } from "../../../db";
 import { getSession } from "next-auth/react";
-
-const prisma = new PrismaClient()
 
 interface ProfileRequest {
     firstName?: string,
@@ -26,7 +24,7 @@ export default async function handler(
     if (req.method === 'PUT') {
         const { dni, firstName, lastName } = req.body
         try {
-            const foundUser = await prisma.user.findUnique({
+            const foundUser = await db.user.findUnique({
                 where: {
                     id: session?.user?.uid
                 }
@@ -34,7 +32,7 @@ export default async function handler(
 
             if (!foundUser) return res.status(404).json({ message: 'Usuario no encontrado' });
 
-            const user = await prisma.user.update({
+            await db.user.update({
                 data: {
                     identification_number: dni,
                     last_name: lastName,

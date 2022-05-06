@@ -23,10 +23,10 @@ export const FormInput: FC<IProps> = ({
   inputClassName,
   ...props
 }) => {
-  const labelClass = `block mb-2 font-bold text-2xl text-black dark:text-gray-400 text-${
+  const labelClass = `block mb-2 font-bold text-base text-black dark:text-gray-400 lg:text-${
     `[${labelFontSize}px]` || '2xl'
   } text-${`[${labelColor}]` || 'black'}`
-  const inputClass = `px-4 border border-gray-400 outline-none ${inputClassName}`
+  const inputClass = `px-4 border border-gray-400 outline-none rounded ${inputClassName}`
   const containerClass = `mb-6 w-full ${className}`
 
   return (
@@ -37,8 +37,10 @@ export const FormInput: FC<IProps> = ({
         </label>
       )}
       <input className={inputClass} {...register} {...props} />
-      <div className="min-h-[60px] items-center flex">
-        <span className="text-xl text-red-600 dark:text-red-400">{error}</span>
+      <div className="min-h-[30px] md:min-h-[60px] items-center flex">
+        <span className="text-sm md:text-xl text-red-600 dark:text-red-400">
+          {error}
+        </span>
       </div>
     </div>
   )

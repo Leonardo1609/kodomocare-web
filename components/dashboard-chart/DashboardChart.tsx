@@ -33,6 +33,11 @@ export const DashboardChart: FC<IDashboardChart> = ({ data }) => {
         plugins: {
           legend: { display: false },
         },
+        scales: {
+          yAxis: {
+            suggestedMin: 0,
+          },
+        },
       }}
       data={data}
     />

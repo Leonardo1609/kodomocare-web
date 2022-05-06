@@ -1,40 +1,19 @@
-import * as yup from 'yup'
 import Link from 'next/link'
+import { EditParentData } from '../../../../../interfaces/forms/edit-data'
 import { FormInput } from '../../../../../components/form-input/FormInput'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { NextPageWithLayout } from '../../../../../interfaces/layout'
-import { PrismaClient, user } from '@prisma/client'
-import { EditData } from '../../../../../interfaces/forms/edit-data'
 import { GetServerSideProps } from 'next'
-import { getSession } from 'next-auth/react'
-import { ReactElement } from 'react'
 import { Layout } from '../../../../../components/layout/Layout'
-import { clientAxios } from '../../../../../axios/clientAxios'
+import { NextPageWithLayout } from '../../../../../interfaces/layout'
+import { ReactElement } from 'react'
+import { db } from '../../../../../db'
+import { editParentSchema } from '../../../../../yup-schemas'
+import { getSession } from 'next-auth/react'
 import { toast } from 'react-toastify'
+import { updateParent } from '../../../../../services/client/users'
+import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
-
-const prisma = new PrismaClient()
-
-const editParentSchema = yup
-  .object({
-    firstName: yup.string().required('Nombres son obligatorios'),
-    lastName: yup.string().required('Apellidos son obligatorios'),
-    dni: yup
-      .string()
-      .min(8, 'Se requiere 8 caracteres')
-      .max(8, 'Se requiere 8 caracteres')
-      .required('DNI es obligatorio'),
-    email: yup
-      .string()
-      .email('Ingrese un correo válido')
-      .required('El campo está vacío, ingrese un correo electrónico'),
-    password: yup.string(),
-    confirmPassword: yup
-      .string()
-      .oneOf([yup.ref('password'), null], 'Las contraseñas no coinciden'),
-  })
-  .required()
+import { user } from '@prisma/client'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -52,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     }
   }
 
-  const parent = await prisma.user.findUnique({
+  const parent = await db.user.findUnique({
     where: {
       id: userId,
     },
@@ -87,7 +66,7 @@ const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<EditData>({
+  } = useForm<EditParentData>({
     defaultValues: {
       firstName: user.first_name,
       lastName: user.last_name,
@@ -105,7 +84,7 @@ const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
     dni,
     email,
     password,
-  }: EditData) => {
+  }: EditParentData) => {
     const body = {
       firstName,
       lastName,
@@ -115,9 +94,7 @@ const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
     }
 
     try {
-      const resp = await clientAxios.put(`/user/update-parent/${user.id}`, {
-        ...body,
-      })
+      const resp = await updateParent(user.id, body)
       if (resp.status === 200) {
         toast.success(resp.data.message)
         router.push(`/admin/users/user/${user.id}`)
@@ -129,45 +106,45 @@ const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
 
   return (
     <form
-      className="flex flex-col px-20"
+      className="flex flex-col md:px-20"
       onSubmit={handleSubmit(onSubmit)}
       autoComplete="off"
     >
       <div className="flex flex-col w-full items-start">
-        <h3 className="text-[30px] border-b-black dark:border-b-gray-300 text-gray-300 border-b-[3px] w-full pb-3 mb-5">
+        <h3 className="text-xl md:text-[30px] border-b-black dark:border-b-gray-300 text-gray-300 border-b-[3px] w-full pb-3 mb-5">
           Datos personales
         </h3>
-        <div className="grid grid-cols-2 gap-20 w-full">
-          <div className="col-span-1">
+        <div className="grid grid-cols-2 md:gap-20 w-full">
+          <div className="col-span-2 md:col-span-1">
             <FormInput
-              inputClassName="text-lg h-[54px] w-full rounded"
+              inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
               error={errors.firstName?.message}
               placeholder="Ingrese los nombres"
               register={register('firstName')}
               type="text"
             />
           </div>
-          <div className="col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <FormInput
-              inputClassName="text-lg h-[54px] w-full rounded"
+              inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
               error={errors.lastName?.message}
               placeholder="Ingrese los apellidos"
               type="text"
               register={register('lastName')}
             />
           </div>
-          <div className="col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <FormInput
-              inputClassName="text-lg h-[54px] w-full rounded"
+              inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
               error={errors.dni?.message}
               placeholder="Ingrese el DNI"
               type="text"
               register={register('dni')}
             />
           </div>
-          <div className="col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <FormInput
-              inputClassName="text-lg h-[54px] w-full rounded"
+              inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
               error={errors.email?.message}
               placeholder="Ingrese el correo"
               type="email"
@@ -177,13 +154,13 @@ const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
         </div>
       </div>
       <div className="flex flex-col w-full items-start">
-        <h3 className="text-[30px] border-b-black border-b-[3px] dark:border-b-gray-300 text-gray-300 w-full pb-3 mb-5">
+        <h3 className="text-lg md:text-[30px] border-b-black border-b-[3px] dark:border-b-gray-300 text-gray-300 w-full pb-3 mb-5">
           Contraseña
         </h3>
-        <div className="grid grid-cols-2 gap-20 w-full">
-          <div className="col-span-1">
+        <div className="grid grid-cols-2 md:gap-20 w-full">
+          <div className="col-span-2 md:col-span-1">
             <FormInput
-              inputClassName="text-lg h-[54px] w-full rounded"
+              inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
               error={errors.password?.message}
               placeholder="Contraseña"
               type="password"
@@ -191,9 +168,9 @@ const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
               autoComplete="new-password"
             />
           </div>
-          <div className="col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <FormInput
-              inputClassName="text-lg h-[54px] w-full rounded"
+              inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
               error={errors.confirmPassword?.message}
               placeholder="Confirmar contraseña"
               type="password"
@@ -202,15 +179,15 @@ const Edit: NextPageWithLayout<{ user: user }> = ({ user }) => {
           </div>
         </div>
       </div>
-      <div className="flex space-x-[86px] justify-center">
+      <div className="flex space-x-[40px] md:space-x-[86px] justify-center">
         <button
-          className="w-[222px] h-10 rounded text-white text-xl bg-primary dark:bg-blue-800 flex justify-center items-center"
+          className="w-[222px] h-10 rounded text-white text-lg md:text-xl bg-primary dark:bg-blue-800 flex justify-center items-center"
           type="submit"
         >
           Guardar
         </button>
         <Link href={`/admin/users/user/${user.id}`} passHref>
-          <a className="w-[222px] h-10 rounded text-white text-xl bg-red-500 dark:bg-red-600 flex justify-center items-center">
+          <a className="w-[222px] h-10 rounded text-white text-lg md:text-xl bg-red-500 dark:bg-red-600 flex justify-center items-center">
             Cancelar
           </a>
         </Link>

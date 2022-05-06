@@ -1,11 +1,8 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth/next";
-import { PrismaClient } from '@prisma/client'
+import { db } from "../../../db";
+import { loginUser } from "../../../services/server/auth";
 import { verifyPassword } from "../../../helpers/auth";
-import { Buffer } from 'buffer'
-import { komodoroAxiosServer } from "../../../axios/komodoroAxios";
-
-const prisma = new PrismaClient()
 
 export default NextAuth({
     pages: {
@@ -43,7 +40,7 @@ export default NextAuth({
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                const user = await prisma.user.findFirst({
+                const user = await db.user.findFirst({
                     where: {
                         email: credentials?.email,
                         role_id: '2'
@@ -51,21 +48,11 @@ export default NextAuth({
                 })
                 if (!user) throw new Error("No autorizado")
 
-                const basicToken = Buffer.from(credentials?.email + ":" + credentials?.password).toString('base64');
-
                 let token: string = ''
 
                 try {
-                    const { data } = await komodoroAxiosServer.post<{ token: string, profileImage: string }>('/login', {
-                        username: credentials?.email,
-                        password: credentials?.password
-                    }, {
-                        headers: {
-                            Authorization: 'Basic ' + basicToken,
-                        }
-                    })
+                    const { data } = await loginUser(credentials?.email!, credentials?.password!)
                     token = data.token
-
                 } catch (err) {
                     throw new Error("Error interno, por favor contacte con el administrador")
                 }

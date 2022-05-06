@@ -1,41 +1,19 @@
-import * as yup from 'yup'
+import Link from 'next/link'
+import { EditKidData } from '../../../../../interfaces/forms/edit-data'
+import { FormInput } from '../../../../../components/form-input/FormInput'
 import { GetServerSideProps } from 'next'
 import { Layout } from '../../../../../components/layout/Layout'
 import { NextPageWithLayout } from '../../../../../interfaces/layout'
 import { ReactElement } from 'react'
-import { kid, PrismaClient } from '@prisma/client'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
+import { editKidSchema } from '../../../../../yup-schemas'
 import { getSession } from 'next-auth/react'
-import { clientAxios } from '../../../../../axios/clientAxios'
+import { kid } from '@prisma/client'
 import { toast } from 'react-toastify'
-import { FormInput } from '../../../../../components/form-input/FormInput'
-import Link from 'next/link'
+import { updateKid } from '../../../../../services/client/kid'
+import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
-
-const prisma = new PrismaClient()
-
-interface EditKidData {
-  firstName: string
-  lastName: string
-  dni: string
-  relationship: string
-  gender: string
-}
-
-const editKidSchema = yup
-  .object({
-    firstName: yup.string().required('Nombres son obligatorios'),
-    lastName: yup.string().required('Apellidos son obligatorios'),
-    dni: yup
-      .string()
-      .min(8, 'Se requiere 8 caracteres')
-      .max(8, 'Se requiere 8 caracteres')
-      .required('DNI es obligatorio'),
-    gender: yup.string().required('Género es obligatorio'),
-    relationship: yup.string().required('Parentesco es obligatorio'),
-  })
-  .required()
+import { yupResolver } from '@hookform/resolvers/yup'
+import { db } from '../../../../../db'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -54,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   const kidId = params?.kidId?.toString()
 
-  const kidFound = await prisma.kid.findUnique({
+  const kidFound = await db.kid.findUnique({
     where: {
       id: kidId,
     },
@@ -104,9 +82,7 @@ const EditKid: NextPageWithLayout<{ kid: kid }> = ({ kid }) => {
 
   const onSubmit = async (data: EditKidData) => {
     try {
-      const resp = await clientAxios.put(`/kid/update-kid/${kid.id}`, {
-        ...data,
-      })
+      const resp = await updateKid(kid.id, data)
       if (resp.status === 200) {
         toast.success(resp.data.message)
         router.push(`/admin/users/user/${kid.user_id}`)
@@ -117,52 +93,52 @@ const EditKid: NextPageWithLayout<{ kid: kid }> = ({ kid }) => {
   }
   return (
     <div>
-      <h3 className="text-[30px] border-b-black dark:border-b-gray-300 text-gray-300 border-b-[3px] w-full pb-3 mb-5">
+      <h3 className="text-xl md:text-[30px] border-b-black dark:border-b-gray-300 text-gray-300 border-b-[3px] w-full pb-3 mb-5">
         Datos del menor
       </h3>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex space-x-16 justify-center">
+        <div className="flex flex-col md:flex-row md:space-x-16 md:justify-center">
           <FormInput
-            className="max-w-[450px]"
+            className="md:max-w-[450px]"
             error={errors.firstName?.message}
             placeholder="Ingrese los nombres"
-            inputClassName="h-[60px] w-full rounded text-2xl"
+            inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
             type="text"
             register={register('firstName')}
           />
           <FormInput
-            className="max-w-[450px]"
+            className="md:max-w-[450px]"
             error={errors.lastName?.message}
             placeholder="Ingrese los apellidos"
-            inputClassName="h-[60px] w-full rounded text-2xl"
+            inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
             type="text"
             register={register('lastName')}
           />
         </div>
-        <div className="flex space-x-16 justify-center">
+        <div className="flex flex-col md:flex-row md:space-x-16 md:justify-center">
           <FormInput
-            className="max-w-[450px]"
+            className="md:max-w-[450px]"
             error={errors.dni?.message}
             placeholder="Ingrese el dni"
-            inputClassName="h-[60px] w-full rounded text-2xl"
+            inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
             type="text"
             register={register('dni')}
           />
           <FormInput
-            className="max-w-[450px]"
+            className="md:max-w-[450px]"
             error={errors.gender?.message}
             placeholder="Ingrese el género"
-            inputClassName="h-[60px] w-full rounded text-2xl max-w-[450px]"
+            inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
             type="text"
             register={register('gender')}
           />
         </div>
-        <div className="flex space-x-16 justify-center">
+        <div className="flex flex-col md:flex-row md:space-x-16 md:justify-center">
           <FormInput
-            className="max-w-[450px]"
+            className="md:max-w-[450px]"
             error={errors.relationship?.message}
             placeholder="Ingrese el parentesco"
-            inputClassName="h-[60px] w-full rounded text-2xl max-w-[450px]"
+            inputClassName="text-base md:text-lg h-[45px] md:h-[54px] w-full rounded"
             type="text"
             register={register('relationship')}
           />
